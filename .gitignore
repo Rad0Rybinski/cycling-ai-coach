@@ -1,0 +1,47 @@
+# ==========================================
+# 1. SEKRETY I ZMIENNE ŚRODOWISKOWE (Najważniejsze!)
+# ==========================================
+.env
+.env.*
+*.pem
+
+# ==========================================
+# 2. PYTHON CACHE (Tymczasowe pliki Pythona)
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ==========================================
+# 3. WIRTUALNE ŚRODOWISKA (Tego NIGDY nie wrzucamy!)
+# ==========================================
+venv/
+env/
+.venv/
+Scripts/
+Lib/
+Include/
+
+# ==========================================
+# 4. ŚMIECI SYSTEMOWE (Mac / Windows)
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ==========================================
+# 5. USTAWIENIA EDYTORÓW KODU
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ==========================================
+# 6. LOGI I PLIKI TYMCZASOWE
+# ==========================================
+*.log

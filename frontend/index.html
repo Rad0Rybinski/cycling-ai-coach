@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cycling AI Coach</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <header class="text-center mb-10">
+            <h1 class="text-5xl font-extrabold text-blue-800 mb-3 tracking-tight">Cycling Pro-Am Analyzer <span class="text-orange-500">🚴‍♂️</span></h1>
+            <p class="text-xl text-slate-600 font-medium">Sprawdź, czy jesteś Koneserem Kawiarni, czy Lokalnym Dzikiem!</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start mb-12">
+            
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl border-t-4 border-emerald-500 h-full flex flex-col gap-6">
+                
+                <header>
+                    <h2 class="text-3xl font-bold mb-3 flex items-center gap-3 text-slate-800">
+                        <span>🧠</span> Akademia Kolarstwa
+                    </h2>
+                    <p class="text-slate-500 text-sm">Zrozum liczby, które rządzą peletonem. Przesuwaj suwaki i obserwuj, jak zmieniają się wzory i Twoja Drabina Formy.</p>
+                </header>
+
+                <div class="bg-emerald-50 rounded-xl p-5 border border-emerald-100">
+                    <h3 class="font-bold text-lg mb-2 text-emerald-700 flex items-center gap-2"><span>⛰️</span> VAM (Prędkość Wznoszenia)</h3>
+                    
+                    <div class="mb-4">
+                        <div class="flex justify-between mb-1">
+                            <label class="text-sm font-bold text-slate-700">Wysokość góry (Przewyższenie)</label>
+                            <span class="text-sm font-black text-emerald-600"><span id="edu-elev-val">500</span> m</span>
+                        </div>
+                        <input type="range" id="edu-elev" min="50" max="4000" step="50" value="500" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                    </div>
+                    
+                    <div class="mb-5">
+                        <div class="flex justify-between mb-1">
+                            <label class="text-sm font-bold text-slate-700">Czas wjazdu na szczyt</label>
+                            <span class="text-sm font-black text-emerald-600"><span id="edu-time-val">30</span> min</span>
+                        </div>
+                        <input type="range" id="edu-time" min="10" max="600" step="1" value="30" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                    </div>
+                    
+                    <div class="p-3 bg-slate-900 text-emerald-400 font-mono text-center rounded-lg shadow-inner mb-2">
+                        <span id="edu-vam-formula" class="text-sm font-bold tracking-wide">VAM = 500m / 0.50h = 1000 m/h</span>
+                    </div>
+                    <div class="text-center p-2.5 bg-emerald-200/50 rounded-lg border border-emerald-200 transition-colors duration-300">
+                        <span id="edu-vam-rank" class="text-sm font-bold text-emerald-900">🐐 Poziom: Górska Kozica</span>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 rounded-xl p-5 border border-blue-100">
+                    <h3 class="font-bold text-lg mb-2 text-blue-700 flex items-center gap-2"><span>⚡</span> FTP i Stosunek Mocy (W/kg)</h3>
+                    
+                    <div class="mb-4">
+                        <div class="flex justify-between mb-1">
+                            <label class="text-sm font-bold text-slate-700">Masa (Ty + Rower)</label>
+                            <span class="text-sm font-black text-blue-600"><span id="edu-weight-val">80</span> kg</span>
+                        </div>
+                        <input type="range" id="edu-weight" min="50" max="140" step="1" value="80" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                    </div>
+                    
+                    <div class="mb-5">
+                        <div class="flex justify-between mb-1">
+                            <label class="text-sm font-bold text-slate-700">Twoja Moc (FTP)</label>
+                            <span class="text-sm font-black text-blue-600"><span id="edu-power-val">250</span> W</span>
+                        </div>
+                        <input type="range" id="edu-power" min="100" max="500" step="5" value="250" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                    </div>
+
+                    <div class="p-3 bg-slate-900 text-blue-400 font-mono text-center rounded-lg shadow-inner">
+                        <span id="edu-wkg-formula" class="text-sm font-bold tracking-wide">W/kg = 250W / 80kg = 3.12 W/kg</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 rounded-xl p-5 border border-slate-700 text-slate-300 flex-1 mt-2">
+                    <h3 class="font-bold text-lg mb-4 text-white flex items-center gap-2"><span>🔬</span> Jak to liczymy (Fizyka)</h3>
+                    
+                    <div class="mb-4">
+                        <p class="text-xs font-bold text-orange-400 mb-1 uppercase tracking-wider">1. Opór Powietrza (Aero)</p>
+                        <div class="bg-slate-900 p-2.5 rounded text-center text-sm mb-2 shadow-inner font-mono border border-slate-700">
+                            P<sub class="text-xs">aero</sub> = 0.5 &times; &rho; &times; C<sub>d</sub>A &times; <span class="text-red-400 font-bold">v<sup>3</sup></span>
+                        </div>
+                        <p class="text-[11px] leading-relaxed text-slate-400">Prędkość (v) jest do <strong>sześcianu</strong>! Dlatego przyspieszenie z 30 do 40 km/h wymaga drastycznie więcej Watów niż z 20 do 30 km/h. Wybierz pozycję "Aero" po prawej, by obniżyć C<sub>d</sub>A o 10%.</p>
+                    </div>
+
+                    <div>
+                        <p class="text-xs font-bold text-emerald-400 mb-1 uppercase tracking-wider">2. Opór Toczenia</p>
+                        <div class="bg-slate-900 p-2.5 rounded text-center text-sm mb-2 shadow-inner font-mono border border-slate-700">
+                            P<sub class="text-xs">toczenia</sub> = <span class="text-blue-400 font-bold">C<sub>rr</sub></span> &times; m &times; g &times; v
+                        </div>
+                        <p class="text-[11px] leading-relaxed text-slate-400">Tarcie opon o asfalt. Przez współczynnik C<sub>rr</sub> jadąc na rowerze MTB tracisz do 35% więcej mocy niż na cienkiej oponie szosowej przy tej samej prędkości.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-6 h-full">
+                
+                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl border-t-4 border-blue-800">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                        <span>📝</span> Twój Ostatni Trening
+                    </h2>
+                    
+                    <form id="quiz-form" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 focus-within:border-blue-500 transition-colors">
+                                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Masa (kg)</label>
+                                <input type="number" id="q-weight" min="50" max="140" value="80" class="w-full bg-transparent font-bold text-base outline-none" required>
+                            </div>
+                            <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 focus-within:border-blue-500 transition-colors">
+                                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Dystans (km)</label>
+                                <input type="number" id="q-dist" min="5" max="500" value="40" class="w-full bg-transparent font-bold text-base outline-none" required>
+                            </div>
+                            <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 focus-within:border-blue-500 transition-colors">
+                                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">Czas (min)</label>
+                                <input type="number" id="q-time" min="10" max="600" value="30" class="w-full bg-transparent font-bold text-base outline-none" required>
+                            </div>
+                            <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 focus-within:border-blue-500 transition-colors">
+                                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1">W górę (m)</label>
+                                <input type="number" id="q-elev" min="0" max="4000" value="500" class="w-full bg-transparent font-bold text-base outline-none" required>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-3">
+                            <select id="q-terrain" class="w-full border border-slate-200 p-2 rounded-lg bg-slate-50 text-sm font-bold text-slate-700 outline-none transition-colors duration-300">
+                                <option value="Płasko">Płasko</option>
+                                <option value="Pagórki">Pagórki</option>
+                                <option value="Góry">Góry</option>
+                            </select>
+                            <select id="q-pos" class="w-full border border-slate-200 p-2 rounded-lg bg-slate-50 text-sm font-bold text-slate-700 outline-none">
+                                <option>Aero</option>
+                                <option selected>Standard</option>
+                                <option>Wyprostowany</option>
+                            </select>
+                            <select id="q-bike" class="w-full border border-slate-200 p-2 rounded-lg bg-slate-50 text-sm font-bold text-slate-700 outline-none">
+                                <option>Szosa</option>
+                                <option selected>Gravel</option>
+                                <option>MTB</option>
+                            </select>
+                        </div>
+
+                        <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="block text-sm font-bold text-blue-900">Zmęczenie (1=Luz, 10=Odcięcie)</label>
+                                <div class="text-base font-black text-blue-600 bg-white px-3 py-1 rounded shadow-sm border border-blue-100" id="q-rpe-val">7 / 10</div>
+                            </div>
+                            <input type="range" id="q-rpe" min="1" max="10" value="7" class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer accent-blue-600 mt-2">
+                        </div>
+
+                        <div class="bg-gradient-to-br from-orange-400 to-amber-400 p-4 rounded-xl border border-orange-500 mt-4 shadow-md">
+                            <label class="block text-sm font-extrabold text-slate-900 mb-2 flex items-center gap-2">
+                                <span>🔑</span> Twój klucz API OpenAI
+                            </label>
+                            <input type="password" id="q-api-key" placeholder="sk-proj-..." class="w-full bg-white/95 text-slate-900 border border-orange-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-800 transition-shadow font-mono text-sm shadow-inner" required>
+                            <p class="text-[11px] text-orange-950 font-semibold mt-2 leading-tight opacity-80">Klucz służy do jednorazowego wygenerowania porady. Nie jest zapisywany w bazie.</p>
+                        </div>
+
+                        <button type="submit" id="submit-btn" class="w-full mt-4 bg-blue-800 hover:bg-blue-700 border-b-4 border-blue-950 hover:border-blue-800 text-white font-bold py-4 rounded-xl transition-all shadow-lg text-lg flex justify-center items-center gap-2">
+                            <span>Analizuj z AI Coachem</span>
+                            <span class="text-orange-400">⚡</span>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl flex-1 flex flex-col items-center justify-center">
+                    <h3 class="text-xl font-bold text-white mb-6 tracking-tight">Twoja Drabina Formy</h3>
+                    
+                    <div class="relative w-full max-w-sm h-[320px] bg-slate-700/50 rounded-xl p-3 flex gap-4 shadow-inner border border-slate-600">
+                        <div class="w-12 h-full rounded-lg bg-gradient-to-t from-emerald-500 via-yellow-400 via-orange-500 to-red-600 relative overflow-hidden border-2 border-slate-900 shadow-sm">
+                            <div class="absolute bottom-[27%] w-full h-px bg-black opacity-60"></div> 
+                            <div class="absolute bottom-[40%] w-full h-px bg-black opacity-60"></div> 
+                            <div class="absolute bottom-[54%] w-full h-px bg-black opacity-60"></div> 
+                            <div class="absolute bottom-[81%] w-full h-px bg-black opacity-60"></div>  
+                        </div>
+
+                        <div class="flex-1 flex flex-col-reverse justify-between text-sm font-bold text-slate-300 py-1">
+                            <div id="cat-d" class="p-2 rounded bg-slate-900/50 transition-all duration-300">☕ Koneser (< 2.5)</div>
+                            <div id="cat-c" class="p-2 rounded bg-slate-900/50 transition-all duration-300">🚴 Wycinak (2.5 - 3.2)</div>
+                            <div id="cat-b" class="p-2 rounded bg-slate-900/50 transition-all duration-300">🐗 Lokalny Dzik (3.2 - 4.0)</div>
+                            <div id="cat-a" class="p-2 rounded bg-slate-900/50 transition-all duration-300">👽 Rzeźnik (4.0 - 5.5)</div>
+                            <div id="cat-pro" class="p-2 rounded bg-slate-900/50 text-red-300 transition-all duration-300">🏆 Pro (> 5.5)</div>
+                        </div>
+
+                        <div id="user-marker" class="absolute left-[-5px] bottom-[0%] flex items-center gap-2 transition-all duration-500 ease-out z-10" style="transform: translateY(50%);">
+                            <div class="w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-r-[16px] border-r-white drop-shadow-lg"></div>
+                            <div class="bg-white text-slate-900 font-extrabold text-sm px-3 py-1.5 rounded-lg shadow-xl border-2 border-slate-200 whitespace-nowrap">
+                                <span id="user-wkg-final">0.00</span> W/kg
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="result-section" class="hidden bg-slate-900 text-slate-100 p-8 md:p-12 rounded-3xl shadow-2xl relative overflow-hidden border border-slate-700 z-10">
+            <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-blue-600 opacity-20 blur-3xl pointer-events-none"></div>
+            
+            <div id="loading" class="hidden text-center py-12 z-20 relative">
+                <div class="inline-block relative w-16 h-16 mb-6">
+                    <div class="absolute top-0 left-0 w-full h-full border-4 border-slate-700 rounded-full"></div>
+                    <div class="absolute top-0 left-0 w-full h-full border-4 border-orange-500 rounded-full border-t-transparent animate-spin"></div>
+                </div>
+                <h3 class="text-2xl font-bold mb-2">Zadzieram kiecę i lecę... (AI analizuje)</h3>
+                <p class="text-slate-400 text-lg">Przeliczam Twoje dane przez algorytmy fizyczne i włączam wirtualnego trenera.</p>
+            </div>
+            
+            <div id="ai-response" class="prose prose-invert prose-lg max-w-none prose-headings:text-orange-400 prose-a:text-blue-300 prose-strong:text-emerald-400 prose-hr:border-slate-700 prose-hr:border-t-2 prose-hr:my-8 mx-auto">
+                </div>
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
