@@ -1,15 +1,78 @@
 // ==========================================
+// 0. UWIERZYTELNIANIE (SUPABASE)
+// ==========================================
+
+// ⚠️ PODMIEŃ TE DWIE LINIJKI NA SWOJE KLUCZE Z PANELU SUPABASE! ⚠️
+const SUPABASE_URL = 'https://geadqvspdsassmvlpixr.supabase.co'; 
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYWRxdnNwZHNhc3NtdmxwaXhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyOTcwNzMsImV4cCI6MjA5MDg3MzA3M30.5pkKOWoN7LFyqilBj_zzBxIbg_u7CkhskH1LCijvKeU';
+
+// ZMIANA: Zmieniliśmy nazwę na 'supabaseClient', żeby nie gryzła się z biblioteką!
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const loginBtn = document.getElementById('login-btn');
+const logoutBtn = document.getElementById('logout-btn');
+const userProfile = document.getElementById('user-profile');
+const userNameDisplay = document.getElementById('user-name');
+
+function updateAuthUI(user) {
+    if (user) {
+        loginBtn.classList.add('hidden');
+        userProfile.classList.remove('hidden');
+        userProfile.classList.add('flex');
+        
+        const fullName = user.user_metadata?.full_name || 'Kolarzu';
+        userNameDisplay.innerText = fullName.split(' ')[0];
+    } else {
+        loginBtn.classList.remove('hidden');
+        userProfile.classList.add('hidden');
+        userProfile.classList.remove('flex');
+    }
+}
+
+async function checkSession() {
+    // Używamy supabaseClient!
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    updateAuthUI(session?.user);
+
+    // Używamy supabaseClient!
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+        updateAuthUI(session?.user);
+    });
+}
+
+// Akcja logowania Google
+loginBtn.addEventListener('click', async () => {
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: window.location.origin + window.location.pathname,
+            // TEN PARAMETR WYMUSZA EKRAN WYBORU KONTA:
+            queryParams: {
+              prompt: 'select_account'
+            }
+        }
+    });
+    if (error) console.error("Błąd logowania:", error.message);
+});
+
+logoutBtn.addEventListener('click', async () => {
+    // Używamy supabaseClient!
+    const { error } = await supabaseClient.auth.signOut();
+    if (error) console.error("Błąd wylogowania:", error.message);
+});
+
+checkSession();
+
+
+// ==========================================
 // 1. LOGIKA EDUKATORA, WZORÓW I DRABINY
 // ==========================================
 
-// --- NOWOŚĆ: Funkcja do automatycznego wykrywania terenu ---
 function autoDetectTerrain() {
-    const dist = parseFloat(document.getElementById('q-dist').value) || 1; // Zabezpieczenie przed dzieleniem przez zero
+    const dist = parseFloat(document.getElementById('q-dist').value) || 1;
     const elev = parseFloat(document.getElementById('q-elev').value) || 0;
     
-    // Obliczamy ile metrów w górę przypada na każdy kilometr
     const ratio = elev / dist;
-    
     const terrainSelect = document.getElementById('q-terrain');
     const oldTerrain = terrainSelect.value;
     let newTerrain = 'Płasko';
@@ -20,7 +83,6 @@ function autoDetectTerrain() {
         newTerrain = 'Pagórki';
     }
 
-    // Aplikujemy nowy teren i delikatnie migamy kolorem, by użytkownik to zauważył
     if (oldTerrain !== newTerrain) {
         terrainSelect.value = newTerrain;
         terrainSelect.classList.add('bg-blue-100', 'border-blue-500');
@@ -31,7 +93,7 @@ function autoDetectTerrain() {
 }
 
 function updateEducatorAndLadderLive() {
-    // --- 1. OBSŁUGA VAM ---
+    // --- VAM ---
     const elev = parseFloat(document.getElementById('edu-elev').value);
     const timeMin = parseFloat(document.getElementById('edu-time').value);
     
@@ -53,7 +115,7 @@ function updateEducatorAndLadderLive() {
         document.getElementById('edu-vam-rank').innerText = vamRank;
     }
 
-    // --- 2. OBSŁUGA W/kg I WZORU ---
+    // --- W/kg ---
     const weight = parseFloat(document.getElementById('edu-weight').value);
     const power = parseFloat(document.getElementById('edu-power').value);
     
@@ -66,7 +128,7 @@ function updateEducatorAndLadderLive() {
     
     document.getElementById('user-wkg-final').innerText = wkgFormatted;
 
-    // --- 3. OBSŁUGA DRABINY ---
+    // --- DRABINA ---
     const minWkgScale = 1.0;
     const maxWkgScale = 6.5; 
     let clampedWkg = Math.max(minWkgScale, Math.min(maxWkgScale, wkg));
@@ -100,27 +162,23 @@ function updateEducatorAndLadderLive() {
     }
 }
 
-// Synchronizacja Suwaków (Lewa strona) -> Pola tekstowe (Prawa strona)
+// Magiczne Lustro (Suwaki -> Pola)
 ['edu-elev', 'edu-time', 'edu-weight'].forEach(id => {
     document.getElementById(id).addEventListener('input', (e) => {
         const rightSideId = id.replace('edu-', 'q-');
         document.getElementById(rightSideId).value = e.target.value;
         updateEducatorAndLadderLive();
         
-        // Jeśli przesuwamy suwak przewyższenia, sprawdzamy teren!
-        if (id === 'edu-elev') {
-            autoDetectTerrain();
-        }
+        if (id === 'edu-elev') autoDetectTerrain();
     });
 });
 document.getElementById('edu-power').addEventListener('input', updateEducatorAndLadderLive);
 
-// Synchronizacja Pól tekstowych (Prawa strona) -> Suwaki (Lewa strona)
+// Magiczne Lustro (Pola -> Suwaki)
 ['q-elev', 'q-time', 'q-weight', 'q-dist'].forEach(id => {
     const el = document.getElementById(id);
     if(el) {
         el.addEventListener('input', (e) => {
-            // Dystans nie ma swojego suwaka po lewej, więc go pomijamy w synchronizacji
             if (id !== 'q-dist') {
                 const leftSideId = id.replace('q-', 'edu-');
                 const slider = document.getElementById(leftSideId);
@@ -128,10 +186,7 @@ document.getElementById('edu-power').addEventListener('input', updateEducatorAnd
             }
             updateEducatorAndLadderLive();
             
-            // Jeśli wpisujemy nowe przewyższenie lub dystans, sprawdzamy teren!
-            if (id === 'q-elev' || id === 'q-dist') {
-                autoDetectTerrain();
-            }
+            if (id === 'q-elev' || id === 'q-dist') autoDetectTerrain();
         });
     }
 });
@@ -144,9 +199,8 @@ if (rpeSlider) {
     });
 }
 
-// Inicjalizacja na start
 updateEducatorAndLadderLive();
-autoDetectTerrain(); // Od razu ustawiamy odpowiedni teren na bazie domyślnych 40km i 500m!
+autoDetectTerrain();
 
 
 // ==========================================
@@ -189,7 +243,8 @@ document.getElementById('quiz-form').addEventListener('submit', async (e) => {
     resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     try {
-        const response = await fetch('https://cycling-ai-coach.onrender.com/api/analyze', {
+        
+        const response = await fetch('https://cycling-ai-coach.onrender.com/api/analyze', { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -220,7 +275,7 @@ document.getElementById('quiz-form').addEventListener('submit', async (e) => {
         }
     } catch (error) {
         loadingDiv.classList.add('hidden');
-        responseDiv.innerHTML = `<p class="text-red-500 font-bold">Błąd połączenia z serwerem. Upewnij się, że Twój serwer Python (FastAPI) jest uruchomiony!</p>`;
+        responseDiv.innerHTML = `<p class="text-red-500 font-bold">Błąd połączenia z serwerem API!</p>`;
         console.error("Błąd API:", error);
     } finally {
         submitBtn.disabled = false;
