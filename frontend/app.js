@@ -1,3 +1,7 @@
+// ==========================================
+// 0. UWIERZYTELNIANIE (SUPABASE)
+// ==========================================
+
 const SUPABASE_URL = 'https://geadqvspdsassmvlpixr.supabase.co'; 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlYWRxdnNwZHNhc3NtdmxwaXhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyOTcwNzMsImV4cCI6MjA5MDg3MzA3M30.5pkKOWoN7LFyqilBj_zzBxIbg_u7CkhskH1LCijvKeU';
 
@@ -316,6 +320,9 @@ historyBtn.addEventListener('click', async () => {
         const dateObj = new Date(workout.created_at);
         const formattedDate = dateObj.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
+        // NOWOŚĆ: Wyliczamy średnią prędkość w locie!
+        const avgSpeed = (workout.distance_km / (workout.duration_min / 60)).toFixed(1);
+
         return `
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
                 <div class="flex flex-col md:flex-row md:justify-between border-b border-slate-100 pb-3 mb-4 gap-2">
@@ -329,7 +336,7 @@ historyBtn.addEventListener('click', async () => {
                 <div class="text-sm text-slate-600 flex gap-4 mb-4 font-bold uppercase tracking-wide">
                     <span class="flex items-center gap-1"><span class="text-lg">⏱️</span> ${workout.duration_min} min</span>
                     <span class="flex items-center gap-1"><span class="text-lg">📏</span> ${workout.distance_km} km</span>
-                </div>
+                    <span class="flex items-center gap-1 text-blue-600"><span class="text-lg">🚴</span> ${avgSpeed} km/h</span> </div>
                 
                 <div class="text-sm bg-slate-50 p-4 rounded-lg border border-slate-100 prose prose-sm max-w-none prose-headings:text-orange-500 prose-p:leading-relaxed">
                     ${marked.parse(workout.ai_advice)}

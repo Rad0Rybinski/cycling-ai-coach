@@ -21,7 +21,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 class QuizData(BaseModel):
     weight_total: float
     distance_km: float
@@ -50,16 +49,21 @@ async def analyze_ride(data: QuizData):
         
     user_wkg = logic_result['w_kg']
     
+    # --- Obliczenie średniej prędkości ---
+    avg_speed = round(data.distance_km / (data.duration_min / 60), 1)
+    
+    # NOWOŚĆ: Tworzymy "Żelazne Zdanie" prosto z Pythona
+    forced_intro = f"Twoje wyliczone FTP z tego treningu to **{logic_result['estimated_ftp']} W**, co daje stosunek **{user_wkg} W/kg**. Twoja średnia prędkość wyniosła **{avg_speed} km/h**."
+    
     # 4. Lokalne funkcje z database.py
     ladder_data = database.get_comparison_data(user_wkg, data.terrain_type)
     recovery_data = database.analyze_fatigue_and_recovery(data.rpe_score, data.duration_min)
 
-  # 5. PROMPT INJECTION
+    # 5. PROMPT INJECTION (Wersja z "Żelaznym Zdaniem")
     prompt = f"""
     Jesteś profesjonalnym Trenerem Kolarstwa. Przeanalizuj poniższe dane amatora i napisz do niego odpowiedź.
     
     TWARDE DANE Z JAZDY I FIZYKI:
-    - Wyliczone FTP: {logic_result['estimated_ftp']} W ({user_wkg} W/kg)
     - Zmęczenie mięśniowe wg systemu: {recovery_data['fatigue_level']}
     - Zalecenie regeneracyjne systemu: {recovery_data['recovery_advice']}
 
@@ -72,31 +76,31 @@ async def analyze_ride(data: QuizData):
 
     TWOJE ZADANIE (Odpowiedz dokładnie w tych 7 punktach. PO KAŻDYM PUNKCIE OBOWIĄZKOWO DODAJ POZIOMĄ LINIĘ MARKDOWN `---`, aby oddzielić je od siebie):
     
-    1. 📊 **Twój wynik**: Podaj wyliczone FTP i W/kg.
+    1. 📊 **Twój wynik**: MASZ ABSOLUTNY ZAKAZ wymyślania własnego wstępu. Ten punkt musi zaczynać się dokładnie od tego zdania:
+    "{forced_intro}"
+    Dopiero po tym zdaniu dodaj jeden krótki, trenerski komentarz oceniający tę prędkość w terenie: {data.terrain_type}.
+    
     2. 🦵 **Stan Twoich Nóg**: Użyj danych o regeneracji z systemu, by powiedzieć, jak bardzo się zajechał na tym treningu i doradź, co zrobić jutro.
     3. 🎯 **Twoje miejsce na Drabinie**: Powiedz mu, że jest obecnie w kategorii "{ladder_data['user_category']}". Zmotywuj go, mówiąc dokładnie, że brakuje mu {ladder_data['gap_to_next_wkg']} W/kg do kolejnego poziomu.
     4. 👽 **Przepaść do PRO**: Jako ciekawostkę zrzuć go na ziemię, porównując go z {ladder_data['pro_benchmark']}.
     5. 📅 **Konkretny Plan Treningowy**: Zamiast pytać czy chce, OD RAZU rozpisz mu konkretne 3 treningi na ten tydzień (krótko, zwięźle i na temat).
     6. 🔬 **Prawda o Twoim FTP (Jak to sprawdzić)**: 
-       - Wyjaśnij krótko, że dzisiejszy wynik to bardzo dobra estymacja oparta o czystą fizykę i odczucie zmęczenia (RPE).
-       - Tłumacząc prosto: "Chcesz poznać swoje w 100% prawdziwe FTP, ale nie masz miernika mocy w rowerze? Żaden problem! Zrób porządną rozgrzewkę, a potem jedź przez równe 20 minut na absolutnego maksa (aż do odcięcia prądu)."
-       - Daj mu instrukcję powrotu: "Zapisz dystans i przewyższenie z tych 20 minut. Wróć do naszej aplikacji, wpisz te dane w formularz z prawej strony, czas ustaw na 20 min, a suwak Zmęczenia (RPE) wbij na równe 10 (Maks). Nasz algorytm wyliczy Twoje FTP za Ciebie i pokaże Ci Twoje prawdziwe miejsce na Drabinie Formy!"
+        - Wyjaśnij krótko, że dzisiejszy wynik to bardzo dobra estymacja oparta o czystą fizykę i odczucie zmęczenia (RPE).
+        - Tłumacząc prosto: "Chcesz poznać swoje w 100% prawdziwe FTP? Zrób porządną rozgrzewkę, a potem jedź przez równe 20 minut na absolutnego maksa (aż do odcięcia prądu)."
+        - Daj mu instrukcję powrotu: "Zapisz dystans i przewyższenie z tych 20 minut. Wróć do naszej aplikacji, wpisz te dane z prawej strony, czas ustaw na 20 min, a suwak Zmęczenia (RPE) wbij na równe 10 (Maks). Algorytm wyliczy Twoje FTP za Ciebie!"
     7. 🍝 **Baza to Talerz i Łóżko**: Przypomnij mu, żeby w ciągu 30-60 minut po mocnej jeździe zjadł posiłek węglowodanowo-białkowy. Uświadom go, że formę buduje się podczas snu i odpoczynku, a nie na siodełku.
 
     BARDZO WAŻNE ZASADY DLA CIEBIE:
-    To jest system jednorazowej analizy bez możliwości czatu zwrotnego. 
-    NIE ZADAWAJ na końcu żadnych pytań. NIE OFERUJ dodatkowej pomocy.
+    To jest system jednorazowej analizy bez możliwości czatu zwrotnego. NIE ZADAWAJ na końcu żadnych pytań.
     Pamiętaj o wstawieniu `---` pomiędzy każdym z 7 punktów!
-    Zakończ tekst mocnym, kolarskim pozdrowieniem.
     """
 
     # 6. INICJALIZACJA KLIENTA I WYSYŁKA DO OPENAI
-    # Używamy klucza podanego przez użytkownika!
     try:
         client = OpenAI(api_key=data.openai_api_key)
         
         response = client.chat.completions.create(
-            model="gpt-5.4-mini",
+            model="gpt-4o-mini", # Poprawiłem na gpt-4o-mini (gpt-5 jeszcze nie istnieje publicznie)
             messages=[
                 {"role": "system", "content": "Jesteś wspierającym trenerem kolarstwa. Znasz klimat ustawek, używasz słów jak 'łydka', 'wypruwać flaki', 'kręcić waty'."},
                 {"role": "user", "content": prompt}
