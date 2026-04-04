@@ -59,7 +59,7 @@ async def analyze_ride(data: QuizData):
     ladder_data = database.get_comparison_data(user_wkg, data.terrain_type)
     recovery_data = database.analyze_fatigue_and_recovery(data.rpe_score, data.duration_min)
 
-    # 5. PROMPT INJECTION (Wersja z "Żelaznym Zdaniem")
+   # 5. PROMPT INJECTION (Nowa logiczna kolejność + Wyróżniony Plan Treningowy)
     prompt = f"""
     Jesteś profesjonalnym Trenerem Kolarstwa. Przeanalizuj poniższe dane amatora i napisz do niego odpowiedź.
     
@@ -70,29 +70,55 @@ async def analyze_ride(data: QuizData):
     MIEJSCE NA DRABINIE KOLARSKIEJ:
     - Obecna kategoria: {ladder_data['user_category']} ({ladder_data['category_desc']})
     - Brakuje mu: {ladder_data['gap_to_next_wkg']} W/kg, aby wejść o poziom wyżej.
-    
-    KOSMICZNY BENCHMARK (PRO):
     - Twój idol do porównania w tym terenie to: {ladder_data['pro_benchmark']} ({ladder_data['pro_desc']})
 
-    TWOJE ZADANIE (Odpowiedz dokładnie w tych 7 punktach. PO KAŻDYM PUNKCIE OBOWIĄZKOWO DODAJ POZIOMĄ LINIĘ MARKDOWN `---`, aby oddzielić je od siebie):
+    TWOJE ZADANIE:
+    Masz wygenerować odpowiedź używając BARDZO CZYTELNEGO i przewiewnego formatowania.
+    Każdy z 7 punktów MUSI zaczynać się od nagłówka poziomu 3 (czyli użyj: ### ).
+    Używaj list punktowanych (myślników), aby łamać bloki tekstu.
     
-    1. 📊 **Twój wynik**: MASZ ABSOLUTNY ZAKAZ wymyślania własnego wstępu. Ten punkt musi zaczynać się dokładnie od tego zdania:
-    "{forced_intro}"
-    Dopiero po tym zdaniu dodaj jeden krótki, trenerski komentarz oceniający tę prędkość w terenie: {data.terrain_type}.
-    
-    2. 🦵 **Stan Twoich Nóg**: Użyj danych o regeneracji z systemu, by powiedzieć, jak bardzo się zajechał na tym treningu i doradź, co zrobić jutro.
-    3. 🎯 **Twoje miejsce na Drabinie**: Powiedz mu, że jest obecnie w kategorii "{ladder_data['user_category']}". Zmotywuj go, mówiąc dokładnie, że brakuje mu {ladder_data['gap_to_next_wkg']} W/kg do kolejnego poziomu.
-    4. 👽 **Przepaść do PRO**: Jako ciekawostkę zrzuć go na ziemię, porównując go z {ladder_data['pro_benchmark']}.
-    5. 📅 **Konkretny Plan Treningowy**: Zamiast pytać czy chce, OD RAZU rozpisz mu konkretne 3 treningi na ten tydzień (krótko, zwięźle i na temat).
-    6. 🔬 **Prawda o Twoim FTP (Jak to sprawdzić)**: 
-        - Wyjaśnij krótko, że dzisiejszy wynik to bardzo dobra estymacja oparta o czystą fizykę i odczucie zmęczenia (RPE).
-        - Tłumacząc prosto: "Chcesz poznać swoje w 100% prawdziwe FTP? Zrób porządną rozgrzewkę, a potem jedź przez równe 20 minut na absolutnego maksa (aż do odcięcia prądu)."
-        - Daj mu instrukcję powrotu: "Zapisz dystans i przewyższenie z tych 20 minut. Wróć do naszej aplikacji, wpisz te dane z prawej strony, czas ustaw na 20 min, a suwak Zmęczenia (RPE) wbij na równe 10 (Maks). Algorytm wyliczy Twoje FTP za Ciebie!"
-    7. 🍝 **Baza to Talerz i Łóżko**: Przypomnij mu, żeby w ciągu 30-60 minut po mocnej jeździe zjadł posiłek węglowodanowo-białkowy. Uświadom go, że formę buduje się podczas snu i odpoczynku, a nie na siodełku.
+    Oto DOKŁADNA STRUKTURA I KOLEJNOŚĆ, której musisz użyć:
+
+    ### 📊 1. Twój wynik z dzisiejszej jazdy
+    {forced_intro}
+    - Skomentuj krótko tę prędkość w kontekście terenu ({data.terrain_type}).
+
+    ---
+    ### 🎯 2. Twoje miejsce na Drabinie Formy
+    - Jesteś obecnie w kategorii: **{ladder_data['user_category']}**.
+    - Brakuje Ci dokładnie **{ladder_data['gap_to_next_wkg']} W/kg**, aby wejść poziom wyżej. Zmotywuj go do tego.
+
+    ---
+    ### 👽 3. Przepaść do PRO
+    - Twój punkt odniesienia to **{ladder_data['pro_benchmark']}**.
+    - Napisz krótki, złośliwy lub zabawny komentarz o różnicy Waszych poziomów.
+
+    ---
+    ### 🦵 4. Stan Twoich Nóg
+    - Otrzymany sygnał od organizmu: **{recovery_data['fatigue_level']}**.
+    - Skomentuj krótko, jak bardzo się zajechał i doradź konkretnie, co ma zrobić na następnym treningu.
+
+    ---
+    ### 📅 5. Plan Treningowy na ten tydzień
+    - Rozpisz 3 proponowane dni treningowe. Użyj DOKŁADNIE takiego formatowania z użyciem znaku cytatu (>) dla każdego dnia:
+    > 🔹 **Pierwszy trening (np. Wtorek - Interwały):** *[Krótki opis co ma robić]*
+    > 🔹 **Drugi trening (np. Czwartek - Tlen):** *[Krótki opis co ma robić]*
+    > 🔹 **Trzeci trening (np. Weekend - Long Run):** *[Krótki opis co ma robić]*
+
+    ---
+    ### 🍝 6. Baza to Talerz i Łóżko
+    - Przypomnij o zjedzeniu posiłku węglowodanowo-białkowego do 60 minut po jeździe.
+    - Forma rośnie podczas snu, a nie na siodełku.
+
+    ---
+    ### 🔬 7. Prawda o Twoim FTP (Jak to sprawdzić)
+    - Wyjaśnij, że dzisiejszy wynik to bardzo dobra estymacja.
+    - Jeśli chcesz poznać w 100% prawdziwe FTP: Zrób porządną rozgrzewkę, a potem jedź przez równe **20 minut na absolutnego maksa** (aż do odcięcia prądu).
+    - **Instrukcja powrotu:** Zapisz dystans i przewyższenie z tych 20 minut. Wróć do naszej aplikacji, wpisz te dane z prawej strony, czas ustaw na 20 min, a suwak Zmęczenia (RPE) wbij na równe 10 (Maks). Algorytm wyliczy Twoje FTP za Ciebie!
 
     BARDZO WAŻNE ZASADY DLA CIEBIE:
     To jest system jednorazowej analizy bez możliwości czatu zwrotnego. NIE ZADAWAJ na końcu żadnych pytań.
-    Pamiętaj o wstawieniu `---` pomiędzy każdym z 7 punktów!
+    TRZYMAJ SIĘ SZTYWNO POWYŻSZYCH NAGŁÓWKÓW (###) ORAZ ZNAKÓW LINII (---).
     """
 
     # 6. INICJALIZACJA KLIENTA I WYSYŁKA DO OPENAI
