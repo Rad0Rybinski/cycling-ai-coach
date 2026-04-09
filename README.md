@@ -1,6 +1,5 @@
 # 🚴‍♂️ Cycling Pro-Am Analyzer (AI Coach)
 
-
 Profesjonalna aplikacja webowa typu Full-Stack (Frontend + Backend API + Baza Danych) zaprojektowana dla kolarzy. Projekt pozwala na analizę treningów w oparciu o prawdziwe wzory fizyczne (opory powietrza, tarcie, grawitacja), obliczanie kluczowych wskaźników (FTP, VAM, W/kg) oraz generowanie spersonalizowanych porad za pomocą sztucznej inteligencji (OpenAI).
 
 ---
@@ -58,6 +57,7 @@ Na podstawie wyliczonej Mocy Średniej z treningu oraz wskaźnika RPE (Zmęczeni
 
 ## 📂 Struktura Projektu
 
+```text
 cycling-pro-am-analyzer/
 │
 ├── frontend/
@@ -78,44 +78,36 @@ cycling-pro-am-analyzer/
 Celem długofalowym projektu jest stworzenie kompleksowego ekosystemu analityczno-treningowego dla kolarzy amatorów, łączącego rzetelną fizykę z zaawansowaną sztuczną inteligencją. Główne założenia rozwojowe na kolejne etapy życia produktu:
 
 1. Weryfikacja Treningów (Integracja ze Strava API)
-
 Koncepcja: Zastąpienie ręcznego wprowadzania danych automatycznym pobieraniem aktywności z platformy Strava.
 
 Wartość: Gwarantuje to autentyczność wyników (dystans, czas, przewyższenie), zapobiega fałszowaniu statystyk i uwiarygadnia całą platformę.
 
-2. Globalny Ranking Użytkowników (Leaderboard / Grywalizacja)
-
+2. Global Ranking Użytkowników (Leaderboard / Grywalizacja)
 Koncepcja: Wprowadzenie opcjonalnego, publicznego zestawienia kolarzy na podstawie wyliczonego stosunku W/kg oraz FTP.
 
 Wartość: Wprowadza element zdrowej rywalizacji. Użytkownicy mogą śledzić swoje postępy na tle innych zawodników, co znacząco zwiększa retencję i zaangażowanie w aplikacji.
 
 3. Wirtualne Ligi i Lokalne Segmenty
-
 Koncepcja: Stworzenie bazy legendarnych podjazdów i popularnych pętli kolarskich (z przypisanymi na sztywno danymi o dystansie i przewyższeniu).
 
 Wartość: Aplikacja, opierając się na aktualnym FTP użytkownika, estymuje czas przejazdu konkretnego segmentu. AI analizuje brakujący czas do "pobicia rekordu" i rozpisuje precyzyjny plan treningowy, przekształcając suche statystyki w mierzalne, inspirujące cele.
 
 4. Detektyw Aerodynamiki (Test współczynnika CdA)
-
 Koncepcja: Funkcja premium dla użytkowników posiadających fizyczne mierniki mocy w rowerach.
 
 Wartość: Algorytm porównuje moc rzeczywistą (odczyt z korby) z mocą estymowaną przez silnik fizyczny aplikacji przy danej prędkości. Pozwala to na obliczenie strat aerodynamicznych i udzielenie wskazówek dotyczących poprawy pozycji na rowerze (np. "zbyt wyprostowana sylwetka kosztuje Cię 40W").
 
 5. Interaktywna Wizualizacja Postępów
-
 Koncepcja: Rozbudowa panelu historii o zaawansowane wykresy liniowe i słupkowe (np. z wykorzystaniem biblioteki Chart.js).
 
 Wartość: Przekształcenie surowych kafelków z danymi w czytelną oś czasu, pokazującą trend wzrostowy formy i pomagającą w planowaniu szczytów formy w sezonie.
 
 6. Generowanie "Wizytówek" Społecznościowych
-
 Koncepcja: Wbudowany generator estetycznych grafik (kwadratów / pionowych plansz) podsumowujących ostatnią jazdę wraz z najciekawszym cytatem od AI Coacha.
 
 Wartość: Użytkownicy mogą łatwo udostępniać swoje wyniki na Instagram Stories lub Strava. Działa to jako potężny silnik marketingu wirusowego (viral) i buduje organiczny zasięg aplikacji.
 
 7. Eksport Treningów do Komputerów Rowerowych (.zwo / .fit)
-
 Koncepcja: Automatyczna konwersja planów treningowych rozpisanych przez sztuczną inteligencję do formatów obsługiwanych przez urządzenia zewnętrzne (Garmin, Wahoo) oraz symulatory (Zwift).
 
 Wartość: Pełna automatyzacja procesu: od analizy, przez ułożenie planu, aż po jego fizyczną realizację, co czyni aplikację w pełni profesjonalnym narzędziem trenerskim.
-
