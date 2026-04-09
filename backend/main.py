@@ -126,7 +126,7 @@ async def analyze_ride(data: QuizData):
         client = OpenAI(api_key=data.openai_api_key)
         
         response = client.chat.completions.create(
-            model="gpt-4o-mini", # Poprawiłem na gpt-4o-mini (gpt-5 jeszcze nie istnieje publicznie)
+            model="gpt-5.4-mini", 
             messages=[
                 {"role": "system", "content": "Jesteś wspierającym trenerem kolarstwa. Znasz klimat ustawek, używasz słów jak 'łydka', 'wypruwać flaki', 'kręcić waty'."},
                 {"role": "user", "content": prompt}
